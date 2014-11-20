@@ -15,7 +15,7 @@ import org.dcm4chee.xds2.infoset.rim.AdhocQueryRequest;
 import org.dcm4chee.xds2.infoset.rim.AdhocQueryResponse;
 import org.dcm4chee.xds2.infoset.rim.RegistryResponseType;
 import org.junit.Test;
-import org.openhie.test.cr.OhieCrIntegration;
+import org.openhie.test.cr.OhieCrIntegrationTest;
 import org.openhie.test.cr.util.CrMessageUtil;
 import org.openhie.test.xds.util.XdsMessageUtil;
 
@@ -29,7 +29,7 @@ import ca.uhn.hl7v2.util.Terser;
  * @author Justin
  *
  */
-public class OhieE2e {
+public class OhieE2eTest {
 
 	/**
 	 * Test basic case
@@ -55,7 +55,7 @@ public class OhieE2e {
 		assertTerser = new Terser(response);
 		CrMessageUtil.assertAccepted(assertTerser);
 		CrMessageUtil.assertHasOneQueryResult(assertTerser);
-		CrMessageUtil.assertHasPID3Containing(assertTerser.getSegment("/QUERY_RESPONSE(0)/PID"), "RJ-439", "TEST", OhieCrIntegration.TEST_DOMAIN_OID);
+		CrMessageUtil.assertHasPID3Containing(assertTerser.getSegment("/QUERY_RESPONSE(0)/PID"), "RJ-439", "TEST", OhieCrIntegrationTest.TEST_DOMAIN_OID);
 		
 		// STEP 30 - Load the XDS PnR
 		
