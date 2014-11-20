@@ -7,6 +7,8 @@ import java.util.Arrays;
 
 import javax.annotation.PreDestroy;
 
+import junit.framework.Assert;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.BeforeClass;
@@ -24,7 +26,7 @@ import ca.uhn.hl7v2.util.Terser;
  * @author Justin
  *
  */
-public class OhieCrIntegration {
+public class OhieCrIntegrationTest {
 
 	private final Log log = LogFactory.getLog(this.getClass());
 
@@ -105,7 +107,7 @@ public class OhieCrIntegration {
 			assertTerser = new Terser(response);
 			CrMessageUtil.assertAccepted(assertTerser);
 			CrMessageUtil.assertReceivingFacility(assertTerser, "TEST_HARNESS", "TEST");
-			CrMessageUtil.assertMessageTypeVersion(assertTerser, "RSP", "Q23", "RSP_K23", "2.5");
+			CrMessageUtil.assertMessageTypeVersion(assertTerser, "RSP", "K23", "RSP_K23", "2.5");
 			try
 			{
 				// Terser should throw!
@@ -128,7 +130,7 @@ public class OhieCrIntegration {
 			assertTerser = new Terser(response);
 			CrMessageUtil.assertAccepted(assertTerser);
 			CrMessageUtil.assertReceivingFacility(assertTerser, "TEST_HARNESS", "TEST");
-			CrMessageUtil.assertMessageTypeVersion(assertTerser, "RSP", "Q23", "RSP_K23", "2.5");
+			CrMessageUtil.assertMessageTypeVersion(assertTerser, "RSP", "K23", "RSP_K23", "2.5");
 			CrMessageUtil.assertHasOneQueryResult(assertTerser);
 			CrMessageUtil.assertHasPID3Containing(assertTerser.getSegment("/QUERY_RESPONSE(0)/PID"), "RJ-439", "TEST", TEST_DOMAIN_OID);
 			
@@ -181,7 +183,7 @@ public class OhieCrIntegration {
 	
 	/**
 	 * OHIE-CR-04
-	 * This test ensures that two assigning authorities cannot assign identifiers from the other’s assigning domain. In this test, the harness mimics two authorities (TEST_HARNESS_A and TEST_HARNESS_B). They each register a patient and the harness then verifies that TEST_HARNESS_B does not assign an identifier from TEST_HARNESS_A’s identity domain
+	 * This test ensures that two assigning authorities cannot assign identifiers from the otherï¿½s assigning domain. In this test, the harness mimics two authorities (TEST_HARNESS_A and TEST_HARNESS_B). They each register a patient and the harness then verifies that TEST_HARNESS_B does not assign an identifier from TEST_HARNESS_Aï¿½s identity domain
 	 */
 	@Test
 	public void OhieCr04()
@@ -214,7 +216,7 @@ public class OhieCrIntegration {
 	
 	/**
 	 * OHIE-CR-05
-	 * This test ensures that the receiver does not reject a message containing only an identifier, and one of gender, date of birth, mother’s identifier. This test makes no assertion about merging/matching patients
+	 * This test ensures that the receiver does not reject a message containing only an identifier, and one of gender, date of birth, motherï¿½s identifier. This test makes no assertion about merging/matching patients
 	 */
 	@Test
 	public void OhieCr05()
@@ -236,7 +238,7 @@ public class OhieCrIntegration {
 			response = CrMessageUtil.sendMessage(step30);
 			assertTerser = new Terser(response);
 			CrMessageUtil.assertAccepted(assertTerser);
-			CrMessageUtil.assertMessageTypeVersion(assertTerser, "RSP", "Q23", "RSP_K23", "2.5");
+			CrMessageUtil.assertMessageTypeVersion(assertTerser, "RSP", "K23", "RSP_K23", "2.5");
 			CrMessageUtil.assertReceivingFacility(assertTerser, "TEST_HARNESS", "TEST");
 			CrMessageUtil.assertHasOneQueryResult(assertTerser);
 			CrMessageUtil.assertHasPID3Containing(assertTerser.getSegment("/QUERY_RESPONSE(0)/PID"), "RJ-441", "TEST", TEST_DOMAIN_OID);
@@ -278,7 +280,7 @@ public class OhieCrIntegration {
 			response = CrMessageUtil.sendMessage(step40);
 			assertTerser = new Terser(response);
 			CrMessageUtil.assertAccepted(assertTerser);
-			CrMessageUtil.assertMessageTypeVersion(assertTerser, "RSP", "Q23", "RSP_K23", "2.5");
+			CrMessageUtil.assertMessageTypeVersion(assertTerser, "RSP", "K23", "RSP_K23", "2.5");
 			CrMessageUtil.assertReceivingFacility(assertTerser, "TEST_HARNESS_A", "TEST");
 			CrMessageUtil.assertHasOneQueryResult(assertTerser);
 			CrMessageUtil.assertHasPID3Containing(assertTerser.getSegment("/QUERY_RESPONSE(0)/PID"), "RJ-449", "TEST_A", TEST_A_DOMAIN_OID);
@@ -292,16 +294,63 @@ public class OhieCrIntegration {
 	}
 	
 	/**
-	 * This test ensures that the receiver is able to match an incoming patient with their mother via the “Mother’s Identifier” property. In this test, the harness with register a patient (the mother) and subsequently will register an infant record (only dob, gender and id) with the mother’s identifier attached. The test will ensure that the link occurred by validating a demographic query contains the mother’s name.
+	 * This test ensures that the receiver is able to match an incoming patient with their mother via the ï¿½Motherï¿½s Identifierï¿½ property. In this test, the harness with register a patient (the mother) and subsequently will register an infant record (only dob, gender and id) with the motherï¿½s identifier attached. The test will ensure that the link occurred by validating a demographic query contains the motherï¿½s name.
 	 */
 	@Test
 	public void OhieCr07()
 	{
-		
+		try
+		{
+			Message step10 = CrMessageUtil.loadMessage("OHIE-CR-07-10"),
+					step20 = CrMessageUtil.loadMessage("OHIE-CR-07-20"),
+					step30 = CrMessageUtil.loadMessage("OHIE-CR-07-30"),
+					step40 = CrMessageUtil.loadMessage("OHIE-CR-07-40");
+			
+			// Step 10 - Setup
+			Message response = CrMessageUtil.sendMessage(step10);
+			Terser assertTerser = new Terser(response);
+			CrMessageUtil.assertAccepted(assertTerser);
+			CrMessageUtil.assertMessageTypeVersion(assertTerser, "ACK", "A01", null, "2.3.1");
+			
+			// Step 20 - Send ADT Message with min data
+			response = CrMessageUtil.sendMessage(step20);
+			assertTerser = new Terser(response);
+			CrMessageUtil.assertAccepted(assertTerser);
+			CrMessageUtil.assertMessageTypeVersion(assertTerser, "ACK", "A01", null, "2.3.1");
+			CrMessageUtil.assertReceivingFacility(assertTerser, "TEST_HARNESS", "TEST");
+			
+			// Step 30 - Verify Creation in the receiver
+			response = CrMessageUtil.sendMessage(step30);
+			assertTerser = new Terser(response);
+			CrMessageUtil.assertAccepted(assertTerser);
+			CrMessageUtil.assertMessageTypeVersion(assertTerser, "RSP", "K23", "RSP_K23", "2.5");
+			CrMessageUtil.assertHasOneQueryResult(assertTerser);
+			CrMessageUtil.assertReceivingFacility(assertTerser, "TEST_HARNESS", "TEST");
+			CrMessageUtil.assertHasPID3Containing(assertTerser.getSegment("/QUERY_RESPONSE(0)/PID"), "RJ-440", "TEST", TEST_DOMAIN_OID);
+			
+			// Step 40 - Harness validates linking
+			response = CrMessageUtil.sendMessage(step40);
+			assertTerser = new Terser(response);
+			CrMessageUtil.assertAccepted(assertTerser);
+			CrMessageUtil.assertMessageTypeVersion(assertTerser, "RSP", "K22", "RSP_K21", "2.5");
+			CrMessageUtil.assertReceivingFacility(assertTerser, "TEST_HARNESS", "TEST");
+			CrMessageUtil.assertHasPID3Containing(assertTerser.getSegment("/QUERY_RESPONSE(0)/PID"), "RJ-440", "TEST", TEST_DOMAIN_OID);
+			assertEquals("JONES", assertTerser.get("/QUERY_RESPONSE(0)/PID-6-1"));
+			assertEquals("JENNIFER", assertTerser.get("/QUERY_RESPONSE(0)/PID-6-2"));
+			assertEquals("RJ-439", assertTerser.get("/QUERY_RESPONSE(0)/PID-21-1"));
+			
+			
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			log.error(e);
+			fail();
+		}
 	}
 	
 	/**
-	 * This test ensures that the receiver is able to store and usefully convey (regurgitate) a more complete patient record having multiple names, addresses, telephone numbers, mother’s identifier, mother’s name, birth date, multiple birth order, etc.
+	 * This test ensures that the receiver is able to store and usefully convey (regurgitate) a more complete patient record having multiple names, addresses, telephone numbers, motherï¿½s identifier, motherï¿½s name, birth date, multiple birth order, etc.
 	 */
 	@Test
 	public void OhieCr08() 
@@ -319,7 +368,7 @@ public class OhieCrIntegration {
 	}
 	
 	/**
-	 * In this test, the test harness will register a patient with a local identifier (TEST domain). The receiver is the assigning authority for the ECID domain and should generate an ECID by whatever means the software performs this task. The test harness will then ask the receiver to do a cross reference between the TEST domain and the ECID domain. This test ensures that the receiver adheres to the “What Domains Returned” query parameter.
+	 * In this test, the test harness will register a patient with a local identifier (TEST domain). The receiver is the assigning authority for the ECID domain and should generate an ECID by whatever means the software performs this task. The test harness will then ask the receiver to do a cross reference between the TEST domain and the ECID domain. This test ensures that the receiver adheres to the ï¿½What Domains Returnedï¿½ query parameter.
 	 */
 	@Test
 	public void OhieCr10()
