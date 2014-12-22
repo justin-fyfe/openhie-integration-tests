@@ -24,6 +24,7 @@ import ca.uhn.hl7v2.app.Connection;
 import ca.uhn.hl7v2.app.Initiator;
 import ca.uhn.hl7v2.llp.LLPException;
 import ca.uhn.hl7v2.model.AbstractComposite;
+import ca.uhn.hl7v2.model.DataTypeException;
 import ca.uhn.hl7v2.model.Message;
 import ca.uhn.hl7v2.model.Segment;
 import ca.uhn.hl7v2.model.Type;
@@ -198,8 +199,19 @@ public final class CrMessageUtil {
 			String universalId) throws HL7Exception {
 
 		Assert.assertEquals("PID", segment.getName());
+		assertHasPIDContainingId(segment, 3, idNumber, namespaceId, universalId);
+
+	}
+
+	/**
+	 * Assert the PID segment has a field identifier with the value specified
+	 * @throws HL7Exception 
+	 * @throws DataTypeException 
+	 */
+	public static void assertHasPIDContainingId(Segment segment, int fieldNo, String idNumber, String namespaceId,
+                                                   String universalId) throws DataTypeException, HL7Exception {
 		boolean hasMatch = false;
-		for(Type typ : segment.getField(3))
+		for(Type typ : segment.getField(fieldNo))
 		{
 			AbstractComposite cx = (AbstractComposite)typ,
 					cx4 = (AbstractComposite)cx.getComponent(3);

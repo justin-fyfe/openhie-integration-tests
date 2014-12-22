@@ -1,5 +1,8 @@
 eclipse.preferences.version=1
+encoding//src/test/java=UTF-8
 encoding//src/test/java/org/openhie/test/cr/OhieCrIntegrationTest.java=UTF-8
 encoding//src/test/java/org/openhie/test/cr/util/CrMessageUtil.java=UTF-8
 encoding//src/test/java/org/openhie/test/e2e/OhieE2eTest.java=UTF-8
 encoding//src/test/java/org/openhie/test/xds/util/XdsMessageUtil.java=UTF-8
+encoding//src/test/resources=UTF-8
+encoding/<project>=UTF-8

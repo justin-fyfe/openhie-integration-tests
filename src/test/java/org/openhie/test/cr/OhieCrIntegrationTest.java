@@ -337,7 +337,7 @@ public class OhieCrIntegrationTest {
 			CrMessageUtil.assertHasPID3Containing(assertTerser.getSegment("/QUERY_RESPONSE(0)/PID"), "RJ-440", "TEST", TEST_DOMAIN_OID);
 			assertEquals("JONES", assertTerser.get("/QUERY_RESPONSE(0)/PID-6-1"));
 			assertEquals("JENNIFER", assertTerser.get("/QUERY_RESPONSE(0)/PID-6-2"));
-			assertEquals("RJ-439", assertTerser.get("/QUERY_RESPONSE(0)/PID-21-1"));
+			CrMessageUtil.assertHasPIDContainingId(assertTerser.getSegment("/QUERY_RESPONSE(0)/PID"), 21, "RJ-439", "TEST", TEST_DOMAIN_OID);
 			
 			
 		}
@@ -355,7 +355,44 @@ public class OhieCrIntegrationTest {
 	@Test
 	public void OhieCr08() 
 	{
-		
+		try
+		{
+			Message step10 = CrMessageUtil.loadMessage("OHIE-CR-08-10"),
+					step30 = CrMessageUtil.loadMessage("OHIE-CR-08-30");
+			
+			// Step 10 - Setup
+			Message response = CrMessageUtil.sendMessage(step10);
+			Terser assertTerser = new Terser(response);
+			CrMessageUtil.assertAccepted(assertTerser);
+			CrMessageUtil.assertMessageTypeVersion(assertTerser, "ACK", "A01", null, "2.3.1");
+			
+			// Step 30 - Verify Creation in the receiver
+			response = CrMessageUtil.sendMessage(step30);
+			assertTerser = new Terser(response);
+			CrMessageUtil.assertAccepted(assertTerser);
+			CrMessageUtil.assertMessageTypeVersion(assertTerser, "RSP", "K22", "RSP_K21", "2.5");
+			CrMessageUtil.assertHasOneQueryResult(assertTerser);
+			CrMessageUtil.assertReceivingFacility(assertTerser, "TEST_HARNESS", "TEST");
+			CrMessageUtil.assertHasPID3Containing(assertTerser.getSegment("/QUERY_RESPONSE(0)/PID"), "RJ-442", "TEST", TEST_DOMAIN_OID);
+			assertEquals("FOSTER", assertTerser.get("/QUERY_RESPONSE(0)/PID-5-1"));
+			assertEquals("FANNY", assertTerser.get("/QUERY_RESPONSE(0)/PID-5-2"));
+			assertEquals("FULL", assertTerser.get("/QUERY_RESPONSE(0)/PID-5-3"));
+			assertEquals("FOSTER", assertTerser.get("/QUERY_RESPONSE(0)/PID-6-1"));
+			assertEquals("MARY", assertTerser.get("/QUERY_RESPONSE(0)/PID-6-2"));
+			assertEquals("1970", assertTerser.get("/QUERY_RESPONSE(0)/PID-7"));
+			assertEquals("F", assertTerser.get("/QUERY_RESPONSE(0)/PID-8"));
+			assertEquals("123 W34 St", assertTerser.get("/QUERY_RESPONSE(0)/PID-11-1"));
+			assertEquals("FRESNO", assertTerser.get("/QUERY_RESPONSE(0)/PID-11-3"));
+			assertEquals("CA", assertTerser.get("/QUERY_RESPONSE(0)/PID-11-4"));
+			assertEquals("3049506", assertTerser.get("/QUERY_RESPONSE(0)/PID-11-5"));
+			
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			log.error(e);
+			fail();
+		}
 	}
 	
 	/**
