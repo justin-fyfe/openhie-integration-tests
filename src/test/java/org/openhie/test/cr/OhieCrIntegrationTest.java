@@ -18,6 +18,7 @@ import org.openhie.test.cr.util.CrMessageUtil;
 import ca.uhn.hl7v2.HL7Exception;
 import ca.uhn.hl7v2.llp.LLPException;
 import ca.uhn.hl7v2.model.Message;
+import ca.uhn.hl7v2.model.v25.message.RSP_K23;
 import ca.uhn.hl7v2.util.Terser;
 
 /**
@@ -401,7 +402,59 @@ public class OhieCrIntegrationTest {
 	@Test
 	public void OhieCr09()
 	{
-		
+		try
+		{
+			Message step10 = CrMessageUtil.loadMessage("OHIE-CR-09-10"),
+					step20 = CrMessageUtil.loadMessage("OHIE-CR-09-20"),
+					step30 = CrMessageUtil.loadMessage("OHIE-CR-09-30"),
+					step40 = CrMessageUtil.loadMessage("OHIE-CR-09-40");
+					
+			
+			// Step 10 - Query for non-existant patient
+			Message response = CrMessageUtil.sendMessage(step10);
+			Terser assertTerser = new Terser(response);
+			CrMessageUtil.assertMessageTypeVersion(assertTerser, "RSP", "K23", "RSP_K23", "2.5");
+			CrMessageUtil.assertReceivingFacility(assertTerser, "TEST_HARNESS", "TEST");
+			CrMessageUtil.assertRejected(assertTerser);
+			assertEquals("AE", assertTerser.get("/QAK-2"));
+			CrMessageUtil.assertHasERR(assertTerser);
+
+			// Step 20 - Unregistered 
+			response = CrMessageUtil.sendMessage(step20);
+			assertTerser = new Terser(response);
+			CrMessageUtil.assertMessageTypeVersion(assertTerser, "RSP", "K23", "RSP_K23", "2.5");
+			CrMessageUtil.assertReceivingFacility(assertTerser, "TEST_HARNESS", "TEST");
+			CrMessageUtil.assertRejected(assertTerser);
+			assertEquals("AE", assertTerser.get("/QAK-2"));
+			CrMessageUtil.assertHasERR(assertTerser);
+			
+			// Step 30 - Verify Creation in the receiver
+			response = CrMessageUtil.sendMessage(step30);
+			assertTerser = new Terser(response);
+			CrMessageUtil.assertAccepted(assertTerser);
+			CrMessageUtil.assertMessageTypeVersion(assertTerser, "ACK", "A01", null, "2.3.1");
+			CrMessageUtil.assertReceivingFacility(assertTerser, "TEST_HARNESS", "TEST");
+
+			// Step 40 - Query
+			response = CrMessageUtil.sendMessage(step40);
+			assertTerser = new Terser(response);
+			CrMessageUtil.assertAccepted(assertTerser);
+			CrMessageUtil.assertMessageTypeVersion(assertTerser, "RSP", "K23", "RSP_K23", "2.5");
+			CrMessageUtil.assertReceivingFacility(assertTerser, "TEST_HARNESS", "TEST");
+			assertEquals("OK", assertTerser.get("/QAK-2"));
+			CrMessageUtil.assertHasOneQueryResult(assertTerser);
+			CrMessageUtil.assertHasPID3Containing(assertTerser.getSegment("/QUERY_RESPONSE(0)/PID"), "RJ-443", "TEST", TEST_DOMAIN_OID);
+			assertEquals(null, assertTerser.get("/QUERY_RESPONSE(0)/PID-5(1)-1"));
+			assertEquals(null, assertTerser.get("/QUERY_RESPONSE(0)/PID-5(1)-2"));
+			assertEquals(null, assertTerser.get("/QUERY_RESPONSE(0)/PID-5(1)-3"));
+			assertEquals(null, assertTerser.get("/QUERY_RESPONSE(0)/PID-5(1)-4"));
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			log.error(e);
+			fail();
+		}
 	}
 	
 	/**
