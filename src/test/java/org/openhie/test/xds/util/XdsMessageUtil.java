@@ -7,11 +7,15 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.security.KeyManagementException;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 
+import javax.net.ssl.*;
 import javax.sound.midi.MidiDevice.Info;
 import javax.xml.bind.DatatypeConverter;
 import javax.xml.bind.JAXBContext;
@@ -54,6 +58,17 @@ import ca.uhn.hl7v2.parser.PipeParser;
  */
 public class XdsMessageUtil {
 
+    // For localhost testing only, remove this static block if not
+    // using a server on localhost
+	static {
+		javax.net.ssl.HttpsURLConnection
+				.setDefaultHostnameVerifier(new javax.net.ssl.HostnameVerifier() {
+					public boolean verify(String hostname,
+							javax.net.ssl.SSLSession sslSession) {
+                        return true;
+					}
+				});
+	}
 
 	private static String s_repositoryEndpoint = System.getProperty("ohie-xds-repository-endpoint");
 	private static String s_registryEndpoint = System.getProperty("ohie-xds-registry-endpoint");
@@ -197,7 +212,7 @@ public class XdsMessageUtil {
 		}
 		catch(Exception e)
 		{
-			throw new RuntimeException("Document Registry not available: " + s_registryEndpoint);
+			throw new RuntimeException("Document Registry not available: " + s_registryEndpoint, e);
 		}
 	}
 	/**
@@ -306,6 +321,7 @@ public class XdsMessageUtil {
 					String calculatedHash = DatatypeConverter.printBase64Binary(digest.digest());
 					Assert.assertEquals(Integer.parseInt(sizeValue), bos.size());
 					Assert.assertEquals(hashValue, calculatedHash);
+                    log.info("The document size: " + bos.size());
 				}
 				catch(Exception e)
 				{
