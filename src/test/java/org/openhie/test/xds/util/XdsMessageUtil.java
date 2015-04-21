@@ -23,7 +23,6 @@ import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dcm4chee.xds2.common.XDSConstants;
@@ -70,11 +69,11 @@ public class XdsMessageUtil {
 				});
 	}
 
-	private static String s_repositoryEndpoint = System.getProperty("ohie-xds-repository-endpoint");
+	private static String s_repositoryEndpoint = "http://iol.test.ohie.org:5001/xdsrepository";
 	private static String s_registryEndpoint = System.getProperty("ohie-xds-registry-endpoint");
 
-	private static final Log log = LogFactory.getLog(XdsMessageUtil.class);
-	
+    private static final Log log = LogFactory.getLog(XdsMessageUtil.class);
+
 	/**
 	 * Load a provide and register document type message from the file system
 	 * @param messageName
@@ -87,7 +86,8 @@ public class XdsMessageUtil {
 		JAXBContext jaxbContext = JAXBContext.newInstance("org.dcm4chee.xds2.infoset.ihe:org.dcm4chee.xds2.infoset.rim");
         Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
 
-		URL fileUrl = XdsMessageUtil.class.getResource(String.format("/xds/%s.xml", messageName));
+        System.out.println("tet : " + String.format("/xds/%s.xml", messageName));
+        URL fileUrl = new URL("file:///Users/snkasthu/SourceCode/cds/openhie-integration-tests/src/test/resources/xds/OHIE-XDS-01-10.xml");
 		File fileUnderTest = new File(fileUrl.getFile());
 		FileInputStream fs = null;
 		try
@@ -186,8 +186,10 @@ public class XdsMessageUtil {
 	public static RegistryResponseType provideAndRegister(ProvideAndRegisterDocumentSetRequestType request)
 	{
 		DocumentRepositoryPortType port = DocumentRepositoryPortTypeFactory.getDocumentRepositoryPortSoap12(s_repositoryEndpoint);
-		
+
 		try {
+            log.error("try");
+            log.info(request);
 			return port.documentRepositoryProvideAndRegisterDocumentSetB(request);
 		} catch (Exception e) {
 		

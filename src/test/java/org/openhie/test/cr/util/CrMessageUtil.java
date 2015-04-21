@@ -98,7 +98,11 @@ public final class CrMessageUtil {
 	 */
 	public static Message loadMessage(String messageName) throws IOException, HL7Exception
 	{
-		URL fileUrl = CrMessageUtil.class.getResource(String.format("/cr/%s.txt", messageName));
+        System.out.println("filepath" + String.format("/Users/snkasthu/SourceCode/cds/openhie-integration-tests/src/test/resources/cr/%s.txt", messageName));
+		//URL fileUrl = CrMessageUtil.class.getResource(String.format("/resources/cr/%s.txt", messageName));
+        //System.out.println("filepath" + fileUrl);
+
+        URL fileUrl = new URL("file:///Users/snkasthu/SourceCode/cds/openhie-integration-tests/src/test/resources/cr/OHIE-CR-11-10.txt");
 		File fileUnderTest = new File(fileUrl.getFile());
 		FileInputStream fs = null;
 		try
